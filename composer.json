@@ -1,0 +1,14 @@
+{
+    "name": "zoomyboy/zpdf",
+    "description": "Zpdf Wrapper for FPDF",
+    "require": {
+        "setasign/fpdf": "^1.8",
+        "smottt/wideimage": "^1.1"
+    },
+    "authors": [
+        {
+            "name": "Philipp Lang",
+            "email": "pille@zoomyboy.de"
+        }
+    ]
+}
