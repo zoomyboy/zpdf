@@ -10,5 +10,9 @@
             "name": "Philipp Lang",
             "email": "pille@zoomyboy.de"
         }
-    ]
+    ],
+	"autoload": {
+		"classmap": ["class/"],
+		"files": ["Helpers.php"]
+	}
 }
