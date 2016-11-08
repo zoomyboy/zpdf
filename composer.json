@@ -4,7 +4,7 @@
     "require": {
         "setasign/fpdf": "^1.8",
         "smottt/wideimage": "^1.1",
-        "zoomyboy/helpers": "dev-master"
+        "zoomyboy/helpers": "^1.0"
     },
 	"minimum-stability": "dev",
     "authors": [
