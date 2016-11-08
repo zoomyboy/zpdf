@@ -1,9 +1,16 @@
 {
     "name": "zoomyboy/zpdf",
     "description": "Zpdf Wrapper for FPDF",
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "git@github.com:zoomyboy/helpers.git"
+		}
+	],
     "require": {
         "setasign/fpdf": "^1.8",
-        "smottt/wideimage": "^1.1"
+        "smottt/wideimage": "^1.1",
+		"zoomyboy/helpers": "dev-master"
     },
     "authors": [
         {
@@ -12,7 +19,6 @@
         }
     ],
 	"autoload": {
-		"classmap": ["class/"],
-		"files": ["Helpers.php"]
+		"classmap": ["class/"]
 	}
 }
