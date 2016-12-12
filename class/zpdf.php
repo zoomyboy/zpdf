@@ -84,7 +84,7 @@ class Zpdf {
 		$this->pdf->SetXY($this->pdf->GetX() + 5, $this->pdf->GetY());
 		$circleRadius = $this->pdf->fontSizePt() * 0.5;
 		foreach ($data as $val) {
-			foreach(range(0,$decode) as $i) {$val = utf8_decode($val);}
+			foreach(range(0,$decode) as $i) {$val = hu($val);}
 			$pos = [$this->pdf->GetX(), $this->pdf->GetY()];
 			while ($val != '') {
 				$pageNumberBeforeRow = $this->pdf->PageNo();
