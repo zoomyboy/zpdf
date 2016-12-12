@@ -11,6 +11,7 @@ class FpdfWrapper extends \FPDF {
 	private $alreadyPublishedRows = 0;
 	private $pageMarginsBefore;
 	private $rowsPadding;
+	private $indent = 0;
 
 	public function __construct($orientation, $unit, $size) {
 		parent::__construct($orientation, $unit, $size);
@@ -93,8 +94,8 @@ class FpdfWrapper extends \FPDF {
 	}
 
 	private function prepareColumn() {
-		$this->SetXY($this->columnCornerX(0), $this->columnCornerY(0));
-		$this->SetMargins($this->columnCornerX(0), $this->columnCornerY(0), abs($this->columnCornerX(1)-$this->GetPageWidth()));
+		$this->SetXY($this->columnCornerX(0) + $this->indent, $this->columnCornerY(0));
+		$this->SetMargins($this->columnCornerX(0) + $this->indent, $this->columnCornerY(0), abs($this->columnCornerX(1)-$this->GetPageWidth()));
 		$this->SetAutoPageBreak(false, $this->GetPageHeight() - $this->columnCornerY(2));
 	}
 
@@ -199,5 +200,23 @@ class FpdfWrapper extends \FPDF {
 	public function getOffsetTopOfCurrentColumn() {
 		$row = $this->getCurrentRow();
 		return $this->GetY() - $this->rowsPadding[$row][0];
+	}
+
+	/**
+	 * Increase indent - e.g. for UL's left padding at page break
+	 *
+	 * @param int $indent 
+	 */
+	public function increaseIndent($indent) {
+		$this->indent += $indent;
+	}
+
+	/**
+	 * Decrease indent - e.g. for UL's left padding at page break
+	 *
+	 * @param int $indent 
+	 */
+	public function decreaseIndent($indent) {
+		$this->indent -= $indent;
 	}
 }

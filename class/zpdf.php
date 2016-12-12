@@ -8,6 +8,7 @@ class Zpdf {
 	private $pdf;
 	private $lineHeight = 1;
 	private $defaultAlign = 'L';
+	private $ulMargin = 5;
 
 	public function __construct($orientation='P', $unit='mm', $size='A4') {
 		$this->pdf = new FpdfWrapper($orientation, $unit, $size);
@@ -76,9 +77,10 @@ class Zpdf {
 	 * @param float $w Width of the list
 	 */
 	public function drawUl($data, $decode=0, $w=null) {
+		$this->pdf->increaseIndent ($this->ulMargin);
 		$posXAnf = $this->pdf->GetX();
 		$marginBefore = $this->pdf->lMargin;
-		$this->pdf->lMargin += 5;
+		$this->pdf->lMargin += $this->ulMargin;
 		$this->pdf->SetXY($this->pdf->GetX() + 5, $this->pdf->GetY());
 		$circleRadius = $this->pdf->fontSizePt() * 0.5;
 		foreach ($data as $val) {
@@ -91,7 +93,8 @@ class Zpdf {
 			$this->pdf->SetXY($posN[0], $posN[1]);
 		}
 		$this->pdf->SetXY($posXAnf, $this->pdf->GetY());
-		$this->pdf->lMargin -= 5;
+		$this->pdf->lMargin -= $this->ulMargin; 
+		$this->pdf->decreaseIndent ($this->ulMargin);
 	}
 
 	public function multiCell($txt, $w=null, $h=null, $border=0, $align=false, $fill=false, $maxline=0) {
