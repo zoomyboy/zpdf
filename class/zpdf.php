@@ -84,9 +84,17 @@ class Zpdf {
 		$this->pdf->SetXY($this->pdf->GetX() + 5, $this->pdf->GetY());
 		$circleRadius = $this->pdf->fontSizePt() * 0.5;
 		foreach ($data as $val) {
-			for($i=0; $i<$decode;$i++) {$val = utf8_decode($val);}
+			foreach(range(0,$decode) as $i) {$val = utf8_decode($val);}
 			$pos = [$this->pdf->GetX(), $this->pdf->GetY()];
-			$this->pdf->MultiCell($w, $circleRadius, $val, 0, 'L', 0);
+			while ($val != '') {
+				$pageNumberBeforeRow = $this->pdf->PageNo();
+				$val = $this->MultiCell($val, null, null, 0, false, false, 1);
+				if($this->pdf->PageNo() == $pageNumberBeforeRow + 1) {
+					//A new page was automatically added with the last printed List line - so we will reset the position to the top left corner of the new page for the next entry
+					//This is nessessary because the position before was saved before the page break occured 
+					$pos = [$this->pdf->lMargin, $this->pdf->tMargin];
+				}
+			}
 			$posN = [$this->pdf->GetX(), $this->pdf->GetY()];
 			$this->pdf->setXY($pos[0], $pos[1]);
 			$this->pdf->Circle($this->pdf->GetX() - 1.8, $this->pdf->GetY() + 2.2, 0.7, 'F');
@@ -103,7 +111,7 @@ class Zpdf {
 		}
 		if (is_null($w)) {$w = 0;}
 		if ($h == null) {$h = $this->pdf->FontSize * $this->lineHeight;}
-		$this->pdf->multiCellMaxline($this->pdf->GetX(), $this->pdf->GetY(), $w, $h, $txt, $border, $align, $fill, $maxline);
+		return $this->pdf->multiCellMaxline($this->pdf->GetX(), $this->pdf->GetY(), $w, $h, $txt, $border, $align, $fill, $maxline);
 	}
 
 	public function setMargins($top, $right, $bottom, $left) {
