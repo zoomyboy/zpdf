@@ -73,10 +73,10 @@ class Zpdf {
 	 * Draws an unordered list on the page
 	 *
 	 * @param array|string[] $data the data to display
-	 * @param int $decode How many times should the function call utf8_decode on any string before output
+	 * @param callable $decode Every value is filtered through that function - useful if value has to be converted to display properly
 	 * @param float $w Width of the list
 	 */
-	public function drawUl($data, $decode=0, $w=null) {
+	public function drawUl($data, $decode, $w=null) {
 		$this->pdf->increaseIndent ($this->ulMargin);
 		$posXAnf = $this->pdf->GetX();
 		$marginBefore = $this->pdf->lMargin;
@@ -84,8 +84,12 @@ class Zpdf {
 		$this->pdf->SetXY($this->pdf->GetX() + 5, $this->pdf->GetY());
 		$circleRadius = $this->pdf->fontSizePt() * 0.5;
 		foreach ($data as $val) {
-			foreach(range(0,$decode) as $i) {$val = hu($val);}
+			if ($decode !== false) {
+				$val = call_user_func($decode, $val);
+			}
 			$pos = [$this->pdf->GetX(), $this->pdf->GetY()];
+
+			$linePositions = [];
 			while ($val != '') {
 				$pageNumberBeforeRow = $this->pdf->PageNo();
 				$val = $this->MultiCell($val, null, null, 0, false, false, 1);
