@@ -90,18 +90,32 @@ class Zpdf {
 			$pos = [$this->pdf->GetX(), $this->pdf->GetY()];
 
 			$linePositions = [];
+			$addCircle = true;
+
 			while ($val != '') {
+				$this->pdf->addBeforePageBreak('drawUlDot', function($wrapper) use ($pos, $pageNumberBeforeRow) {
+					$wrapper->Circle($pos[0] - 1.8, $pos[1] + 2.2, 0.7, 'F');
+				});
+
 				$pageNumberBeforeRow = $this->pdf->PageNo();
 				$val = $this->MultiCell($val, null, null, 0, false, false, 1);
 				if($this->pdf->PageNo() == $pageNumberBeforeRow + 1) {
 					//A new page was automatically added with the last printed List line - so we will reset the position to the top left corner of the new page for the next entry
 					//This is nessessary because the position before was saved before the page break occured 
 					$pos = [$this->pdf->lMargin, $this->pdf->tMargin];
+
+					//Circle has already been added by page break callback - do dont show it!
+					$addCircle = false;
 				}
+
+				$this->pdf->deleteBeforePageBreak('drawUlDot');
 			}
+
 			$posN = [$this->pdf->GetX(), $this->pdf->GetY()];
 			$this->pdf->setXY($pos[0], $pos[1]);
-			$this->pdf->Circle($this->pdf->GetX() - 1.8, $this->pdf->GetY() + 2.2, 0.7, 'F');
+			if ($addCircle) {
+				$this->pdf->Circle($this->pdf->GetX() - 1.8, $this->pdf->GetY() + 2.2, 0.7, 'F');
+			}
 			$this->pdf->SetXY($posN[0], $posN[1]);
 		}
 		$this->pdf->SetXY($posXAnf, $this->pdf->GetY());

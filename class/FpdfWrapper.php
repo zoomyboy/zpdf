@@ -12,6 +12,9 @@ class FpdfWrapper extends \FPDF {
 	private $pageMarginsBefore;
 	private $rowsPadding;
 	private $indent = 0;
+	private $hooks = [
+		'beforePageBreak' => []
+	];
 
 	public function __construct($orientation, $unit, $size) {
 		parent::__construct($orientation, $unit, $size);
@@ -51,6 +54,11 @@ class FpdfWrapper extends \FPDF {
 	}
 
 	public function AcceptPageBreak() {
+		foreach ($this->hooks['beforePageBreak'] as $hook) {
+			if (false === call_user_func($hook, $this)) {
+				return false;
+			}
+		}
 		//Add a new page if this was the last row on the current page
 		if ($this->getCurrentRow() == count($this->rowsPadding)-1) {
 			$this->AddPage();
@@ -65,6 +73,15 @@ class FpdfWrapper extends \FPDF {
 
 	public function Footer() {
 		call_user_func($this->footerCallback, $this);
+	}
+
+	public function addBeforePageBreak($name, $callable) {
+		$this->hooks['beforePageBreak'][$name] = $callable;
+	}
+
+	public function deleteBeforePageBreak($name) {
+		unset ($this->hooks['beforePageBreak'][$name]);
+		$this->hooks['beforePageBreak'] = array_values ($this->hooks['befoprePageBreak']);
 	}
 
 	/**
