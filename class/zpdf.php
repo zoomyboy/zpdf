@@ -6,6 +6,8 @@ class Zpdf {
 	use ColorManager;
 
 	private $pdf;
+	public $hasFooter;
+	public $hasHeader;
 	private $lineHeight = 1;
 	private $defaultAlign = 'L';
 	private $ulMargin = 5;
@@ -92,13 +94,15 @@ class Zpdf {
 			$linePositions = [];
 			$addCircle = true;
 
-			while ($val != '') {
-				$this->pdf->addBeforePageBreak('drawUlDot', function($wrapper) use ($pos, $pageNumberBeforeRow) {
-					$wrapper->Circle($pos[0] - 1.8, $pos[1] + 2.2, 0.7, 'F');
-				});
+			$this->pdf->addBeforePageBreak('drawUlDot', function($wrapper) use ($pos, $pageNumberBeforeRow) {
+				$wrapper->Circle($pos[0] - 1.8, $pos[1] + 2.2, 0.7, 'F');
+			});
 
+			$i = 0;
+			while ($val != '') {
+				$i++;
 				$pageNumberBeforeRow = $this->pdf->PageNo();
-				$val = $this->MultiCell($val, null, null, 0, false, false, 1);
+				$val = $this->MultiCell($val, null, null, 0, false, false);
 				if($this->pdf->PageNo() == $pageNumberBeforeRow + 1) {
 					//A new page was automatically added with the last printed List line - so we will reset the position to the top left corner of the new page for the next entry
 					//This is nessessary because the position before was saved before the page break occured 
@@ -107,9 +111,8 @@ class Zpdf {
 					//Circle has already been added by page break callback - do dont show it!
 					$addCircle = false;
 				}
-
-				$this->pdf->deleteBeforePageBreak('drawUlDot');
 			}
+			$this->pdf->deleteBeforePageBreak('drawUlDot');
 
 			$posN = [$this->pdf->GetX(), $this->pdf->GetY()];
 			$this->pdf->setXY($pos[0], $pos[1]);

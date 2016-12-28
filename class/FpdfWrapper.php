@@ -5,6 +5,8 @@ namespace Zpdf;
 class FpdfWrapper extends \FPDF {
 	use MaxlineMultiCell;
 	use Circles;
+	use CalcHeight;
+
 	public $headerCallback = false;
 	public $footerCallback = false;
 	public $pageBreakCallback = false;
@@ -81,7 +83,7 @@ class FpdfWrapper extends \FPDF {
 
 	public function deleteBeforePageBreak($name) {
 		unset ($this->hooks['beforePageBreak'][$name]);
-		$this->hooks['beforePageBreak'] = array_values ($this->hooks['befoprePageBreak']);
+		$this->hooks['beforePageBreak'] = array_values ($this->hooks['beforePageBreak']);
 	}
 
 	/**
@@ -202,6 +204,10 @@ class FpdfWrapper extends \FPDF {
 	public function getWidthOfCurrentColumn() {
 		$row = $this->getCurrentRow();
 		return $this->getColumnWidth() - $this->rowsPadding[$row][1] - $this->rowsPadding[$row][3];
+	}
+
+	public function NbLines($txt) {
+		return $this->NbLinesC($this->getWidthOfCurrentColumn(), $txt);
 	}
 
 	/**
