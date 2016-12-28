@@ -206,8 +206,8 @@ class FpdfWrapper extends \FPDF {
 		return $this->getColumnWidth() - $this->rowsPadding[$row][1] - $this->rowsPadding[$row][3];
 	}
 
-	public function NbLines($txt) {
-		return $this->NbLinesC($this->getWidthOfCurrentColumn(), $txt);
+	public function getBottomPosOfCurrentColumn() {
+		return $this->columnCornerY(2);
 	}
 
 	/**

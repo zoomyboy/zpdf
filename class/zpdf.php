@@ -89,41 +89,30 @@ class Zpdf {
 			if ($decode !== false) {
 				$val = call_user_func($decode, $val);
 			}
-			$pos = [$this->pdf->GetX(), $this->pdf->GetY()];
+	
+			if ($this->checkIfMultiCellCausesPageBreak($val)) {
+				//Reset X Position at begin of list, so that this fits to the new Row
+				$this->pdf->nextRow();
+				$posXAnf = $this->pdf->GetX();
+			}
 
-			$linePositions = [];
-			$addCircle = true;
+			$this->pdf->Circle($this->pdf->GetX() - 1.8, $this->pdf->GetY() + 2.2, 0.7, 'F');
 
-			$this->pdf->addBeforePageBreak('drawUlDot', function($wrapper) use ($pos, $pageNumberBeforeRow) {
-				$wrapper->Circle($pos[0] - 1.8, $pos[1] + 2.2, 0.7, 'F');
-			});
 
-			$i = 0;
 			while ($val != '') {
-				$i++;
-				$pageNumberBeforeRow = $this->pdf->PageNo();
 				$val = $this->MultiCell($val, null, null, 0, false, false);
-				if($this->pdf->PageNo() == $pageNumberBeforeRow + 1) {
-					//A new page was automatically added with the last printed List line - so we will reset the position to the top left corner of the new page for the next entry
-					//This is nessessary because the position before was saved before the page break occured 
-					$pos = [$this->pdf->lMargin, $this->pdf->tMargin];
-
-					//Circle has already been added by page break callback - do dont show it!
-					$addCircle = false;
-				}
 			}
-			$this->pdf->deleteBeforePageBreak('drawUlDot');
-
-			$posN = [$this->pdf->GetX(), $this->pdf->GetY()];
-			$this->pdf->setXY($pos[0], $pos[1]);
-			if ($addCircle) {
-				$this->pdf->Circle($this->pdf->GetX() - 1.8, $this->pdf->GetY() + 2.2, 0.7, 'F');
-			}
-			$this->pdf->SetXY($posN[0], $posN[1]);
 		}
+
 		$this->pdf->SetXY($posXAnf, $this->pdf->GetY());
 		$this->pdf->lMargin -= $this->ulMargin; 
 		$this->pdf->decreaseIndent ($this->ulMargin);
+	}
+	
+	public function checkIfMultiCellCausesPageBreak($txt) {
+		$bottomOfPage = $this->pdf->getBottomPosOfCurrentColumn();
+		$bottomOfTextRow = $this->pdf->GetY() + $this->getMultiCellHeight($txt);
+		return $bottomOfTextRow > $bottomOfPage;
 	}
 
 	public function multiCell($txt, $w=null, $h=null, $border=0, $align=false, $fill=false, $maxline=0) {
@@ -131,8 +120,32 @@ class Zpdf {
 			$align = $this->defaultAlign;
 		}
 		if (is_null($w)) {$w = 0;}
-		if ($h == null) {$h = $this->pdf->FontSize * $this->lineHeight;}
+		if ($h == null) {$h = $this->defaultHeightOfTextRow();}
 		return $this->pdf->multiCellMaxline($this->pdf->GetX(), $this->pdf->GetY(), $w, $h, $txt, $border, $align, $fill, $maxline);
+	}
+
+	/**
+ 	 * Gets the height of one line of text
+	 * The text height is assumed to be fontHeight * lineHeight - which would be the normal behaviour if you pass null to the MultiCell or Cell method.
+	 *
+	 * @return float
+	 */
+	public function defaultHeightOfTextRow() {
+		return $this->pdf->FontSize * $this->lineHeight;
+	}
+
+	public function getMultiCellHeight($txt) {
+		return $this->pdf->getMultiCellHeight($this->pdf->getWidthOfCurrentColumn(), $this->defaultHeightOfTextRow(), $txt, null, 'J');
+	}
+
+	/**
+   	 * Gets number of lines in a Multicell that contains the given text
+	 * The text height is assumed to be fontHeight * lineHeight - which would be the normal behaviour if you pass null to the MultiCell or Cell method.
+ 	 * 
+	 * @return float
+	 */
+	public function getLineCount($txt) {
+		return $this->pdf->GetLineCount($this->pdf->getWidthOfCurrentColumn(), $txt);
 	}
 
 	public function setMargins($top, $right, $bottom, $left) {
