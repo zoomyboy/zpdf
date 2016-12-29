@@ -11,6 +11,10 @@ class Zpdf {
 	private $lineHeight = 1;
 	private $defaultAlign = 'L';
 	private $ulMargin = 5;
+	/**
+	 * @var array Die aktuelle Schriftart - Das ist ein CSS-String, der mit parseCss() geparsed wurde, also eine Key => Value-Pair-Repräsentation von CSS-Values
+	 */
+	public $currentFont;
 
 	public function __construct($orientation='P', $unit='mm', $size='A4') {
 		$this->pdf = new FpdfWrapper($orientation, $unit, $size);
@@ -44,7 +48,20 @@ class Zpdf {
 		$this->pdf->Text($this->pdf->GetX(), $this->pdf->GetY(), $txt);
 	}
 
+	private function drawMarginTopOfCurrentFont() {
+		if ($this->currentFont && array_key_exists('margin-top', $this->currentFont)) {
+			//var_dump ($this->currentFont['margin-top']);
+			$rawValue = floatVal($this->currentFont['margin-top']);
+			$this->pdf->Ln($rawValue);
+		}
+	}
+
 	public function cell($txt, $w=null, $h=null, $border='', $align='', $fill='') {
+		$this->drawMarginTopOfCurrentFont();
+		$this->cellNoMarginTop($txt, $w, $h, $border, $align, $fill);
+	}
+
+	public function cellNoMarginTop($txt, $w=null, $h=null, $border='', $align='', $fill='') {
 		if (is_null($w)) {$w = $this->pdf->GetStringWidth($txt);}
 		if ($h == null) {$h = $this->pdf->FontSize * $this->lineHeight;}
 		$this->pdf->Cell($w, $h, $txt, $border, 0, $align, $fill);
@@ -100,7 +117,7 @@ class Zpdf {
 
 
 			while ($val != '') {
-				$val = $this->MultiCell($val, null, null, 0, false, false);
+				$val = $this->multiCell($val, null, null, 0, false, false);
 			}
 		}
 
@@ -116,6 +133,8 @@ class Zpdf {
 	}
 
 	public function multiCell($txt, $w=null, $h=null, $border=0, $align=false, $fill=false, $maxline=0) {
+		$this->drawMarginTopOfCurrentFont();
+
 		if ($align === false) {
 			$align = $this->defaultAlign;
 		}
@@ -268,6 +287,7 @@ class Zpdf {
 
 	public function font($font) {
 		$ret = parseCss($font);
+		$this->currentFont = $ret;
 
 		if (array_key_exists('family', $ret)) {
 			$this->setFontFamily($ret['family']);
